@@ -13,7 +13,6 @@ const uint8_t STEP = 5;
 const uint8_t STEP_DELAY = 20;
 
 void setup() {
-
   Serial.begin(115200);
 
   for (int i = 0; i < 3; i++) {
@@ -25,7 +24,7 @@ void setup() {
 }
 
 void sweepMotor(uint8_t pin) {
-
+  // ramp Up
   for (int pwm = 0; pwm <= 255; pwm += STEP) {
     analogWrite(pin, pwm);
     delay(STEP_DELAY);
@@ -33,16 +32,17 @@ void sweepMotor(uint8_t pin) {
 
   delay(500);
 
+  // ramp Down 
   for (int pwm = 255; pwm >= 0; pwm -= STEP) {
     analogWrite(pin, pwm);
     delay(STEP_DELAY);
   }
 
+  analogWrite(pin, 0); 
   delay(500);
 }
 
 void loop() {
-
   sweepMotor(VIB_PIN[0]);
   sweepMotor(VIB_PIN[1]);
   sweepMotor(VIB_PIN[2]);
