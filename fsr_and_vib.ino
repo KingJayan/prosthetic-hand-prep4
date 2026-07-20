@@ -1,0 +1,70 @@
+/*
+  fsr + haptic test
+
+  A4 -> index FSR
+  A5 -> middle FSR
+
+  D3 -> index motor
+  D5 -> middle motor
+  D6 -> palm motor
+*/
+
+const uint8_t FSR_PIN = A4;
+const uint8_t VIB_PIN = 3;
+
+const int FSR_THRESHOLD = 120;
+const int FSR_CEILING = 800;
+
+const uint8_t VIB_MIN_PWM = 70;
+const uint8_t VIB_MAX_PWM = 255;
+
+const unsigned long PRINT_INTERVAL = 100;
+
+unsigned long lastPrint = 0;
+
+int fsrRaw;
+uint8_t vibDuty;
+
+uint8_t forceToDuty(int adc) {
+
+  if (adc < FSR_THRESHOLD)
+    return 0;
+
+  int duty = map(
+    adc,
+    FSR_THRESHOLD,
+    FSR_CEILING,
+    VIB_MIN_PWM,
+    VIB_MAX_PWM
+  );
+
+  return constrain(duty, VIB_MIN_PWM, VIB_MAX_PWM);
+}
+
+void setup() {
+
+  Serial.begin(9600);
+
+  pinMode(VIB_PIN, OUTPUT);
+  analogWrite(VIB_PIN, 0);
+
+  Serial.println("FSR + Haptics Test");
+}
+
+void loop() {
+
+  fsrRaw = analogRead(FSR_PIN);
+  vibDuty = forceToDuty(fsrRaw);
+
+  analogWrite(VIB_PIN, vibDuty);
+
+  if (millis() - lastPrint >= PRINT_INTERVAL) {
+
+    lastPrint = millis();
+
+    Serial.print("Index FSR: ");
+    Serial.print(fsrRaw);
+    Serial.print("  PWM: ");
+    Serial.print(vibDuty);
+  }
+}
